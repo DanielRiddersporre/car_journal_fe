@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 
 interface JournalEntry {
-    type: string;
+    id: string;
+    category: string;
     comment: string;
     date: string;
-    distance: number;
+    distanceInKilometers: number;
     cost: number;
 }
 
@@ -14,30 +15,32 @@ interface DataEntryProps {
 
 function DataEntry({ addNewEntry }: DataEntryProps) {
     const [formData, setFormData] = useState({
-        type: 'Tankning',  // Default value for the select
+        id: '',
+        category: 'Tankning',  // Default value for the select
         comment: '',
         date: '',
-        distance: '',
+        distanceInKilometers: '',
         cost: ''
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const { type, comment, date, distance, cost } = formData;
+        const {id, category, comment, date, distanceInKilometers, cost } = formData;
         const entry = {
-            type,  // Use the type from the form
+            id,
+            category,  // Use the type from the form
             comment,
             date,
-            distance: parseFloat(distance),
-            cost: parseFloat(cost)
+            distanceInKilometers: parseInt(distanceInKilometers),
+            cost: parseInt(cost)
         };
 
         // Call the DataService method to add the entry to the in-memory state
         addNewEntry(entry);
 
         // Optionally reset the form (but keep the default type selected)
-        setFormData({ type: 'Tankning', comment: '', date: '', distance: '', cost: '' });
+        setFormData({id: '', category: 'Tankning', comment: '', date: '', distanceInKilometers: '', cost: '' });
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -51,8 +54,8 @@ function DataEntry({ addNewEntry }: DataEntryProps) {
     return (
         <form onSubmit={handleSubmit} className='flex flex-col my-2 grid-cols-1'>
             <select
-                name="type"
-                value={formData.type}  // Control the value of the select
+                name="category"
+                value={formData.category}  // Control the value of the select
                 onChange={handleChange}
                 className='block appearance-none h-15 text-2xl bg-gray-600 rounded my-1 px-2'
             >
@@ -76,9 +79,9 @@ function DataEntry({ addNewEntry }: DataEntryProps) {
                 className='h-15 text-2xl bg-gray-600 rounded my-1 px-2'
             />
             <input
-                name='distance'
+                name='distanceInKilometers'
                 type='number'
-                value={formData.distance}
+                value={formData.distanceInKilometers}
                 onChange={handleChange}
                 className='h-15 text-2xl bg-gray-600 rounded my-1 px-2'
                 placeholder='Mätarställning i km'

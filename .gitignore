@@ -128,3 +128,14 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# secrets
+config.json
+
+# bins/objects
+be-api/bin/
+be-data/bin/
+be-domain/bin/
+be-api/obj/
+be-data/obj/
+be-domain/obj/

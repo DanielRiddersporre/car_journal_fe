@@ -1,27 +1,46 @@
-import { useState, useEffect } from "react";
-
+// Services/DataService.ts
 interface JournalEntryData {
-    type: string,
-    comment: string,
-    date: string,
-    distance: number,
-    cost: number
+    id: string;
+    category: string;
+    comment: string;
+    date: string;
+    distanceInKilometers: number;
+    cost: number;
 }
 
 class DataService {
+    // Fetch all journal entries
+    static async getAllEntries(): Promise<JournalEntryData[]> {
+        const response = await fetch('http://localhost:5099/api/journalentry/');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    }
 
-    getData = () => {
+    // Add a new journal entry
+    static async addEntry(entry: JournalEntryData): Promise<JournalEntryData> {
+        const response = await fetch('http://localhost:5099/api/journalentry/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(entry),
+        });
+        if (!response.ok) {
+            throw new Error('Failed to add entry');
+        }
+        return response.json();
+    }
 
-        const [journalEntry, setJournalEntryData] = useState();
-    
-        useEffect(() => {
-            fetch('')
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data);
-                setJournalEntryData(data);
-            })
-        })
+    static async deleteEntry(id: string){
+        const response = await fetch(`http://localhost:5099/api/journalentry/${id}`,{
+            method: 'DELETE',
+        });
+        console.log(response.status);
+        if(!response.ok) {
+            throw new Error('Failed to delete entry');
+        }
     }
 }
 

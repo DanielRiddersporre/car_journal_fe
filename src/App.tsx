@@ -8,28 +8,65 @@ import DataService from './Services/DataService';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 interface JournalEntry {
-  type: string;
+  id: string;
+  category: string;
   comment: string;
   date: string;
-  distance: number;
+  distanceInKilometers: number;
   cost: number;
 }
 
 function App() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Function to fetch all entries from the DataService when the component mounts
   useEffect(() => {
-    const fetchedEntries = DataService.getAllEntries();
-    setEntries(fetchedEntries);
+    const fetchEntries = async () => {
+      try {
+        const fetchedEntries = await DataService.getAllEntries(); // Ensure getData returns a promise
+        setEntries(fetchedEntries);
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEntries();
   }, []); // This will only run on the first render (empty dependency array)
 
   // Function to handle adding a new entry
-  const addNewEntry = (entry: JournalEntry) => {
-    DataService.addEntry(entry); // Add the entry to the DataService
-    const updatedEntries = DataService.getAllEntries(); // Get the updated entries
-    setEntries(updatedEntries); // Update the state to reflect the new entries
+  const addNewEntry = async (entry: JournalEntry) => {
+    try {
+      await DataService.addEntry(entry); // Add the entry to the DataService
+      const updatedEntries = await DataService.getAllEntries(); // Get the updated entries
+      setEntries(updatedEntries); // Update the state to reflect the new entries
+    } catch (error: any) {
+      setError(error.message);
+      console.log(error.message);
+    }
   };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await DataService.deleteEntry(id); // Call the DataService to delete the entry
+      // Optimistically update the state by filtering out the deleted entry
+      setEntries((prevEntries) => prevEntries.filter(entry => entry.id !== id));
+    } catch (error: any) {
+      setError(error.message);
+      console.log(error.message);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <>
@@ -41,8 +78,8 @@ function App() {
             </div>
             <Routes>
               <Route index element={<Overview />} />
-              <Route path="dataEntry" element={<DataEntry addNewEntry={addNewEntry}/>}/>
-              <Route path="dataPresentation" element={<DataPresentation entries={entries} />}  />
+              <Route path="dataEntry" element={<DataEntry addNewEntry={addNewEntry} />} />
+              <Route path="dataPresentation" element={<DataPresentation entries={entries} onDelete={handleDelete}/>} />
             </Routes>
           </BrowserRouter>
         </div>
@@ -52,3 +89,4 @@ function App() {
 }
 
 export default App;
+
