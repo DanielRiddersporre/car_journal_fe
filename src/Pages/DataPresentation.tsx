@@ -1,5 +1,7 @@
-import trash from '../assets/trash.png'
-import DataService from '../Services/DataService';
+import { useState } from 'react';
+import trash from '../assets/trash.png';
+import edit from '../assets/edit.png';
+
 interface JournalEntry {
   id: string;
   category: string;
@@ -15,18 +17,37 @@ interface DataPresentationProps {
 }
 
 const DataPresentation: React.FC<DataPresentationProps> = ({ entries, onDelete }) => {
-  
+  // State to track which entry is selected (for toggling visibility)
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const handleClick = (id: string) => {
+    setSelectedId(selectedId === id ? null : id); // Toggle visibility based on selected ID
+  };
+
   return (
     <div>
       <ul>
-        {entries.map((entry, index) => (
-          <li key={index} className='bg-blue-950 rounded-2xl my-2 px-2 py-1'>
-              <span className="text-2xl font-bold">{entry.category}</span>
-              <p className="text-blue-500">Kommentar: {entry.comment}</p>
-              <p className="text-blue-500">Datum: {formatDate(entry.date)}</p>
-              <p className="text-blue-500">Mätarställning: {entry.distanceInKilometers} km</p>
-              <p className="text-blue-500">Kostnad: {entry.cost}:-</p>
-              <button onClick={() => onDelete(entry.id)}><img src={trash} className='w-8 h-8' /></button>
+        {entries.map((entry) => (
+          <li key={entry.id} className='bg-blue-950 rounded-2xl my-2 px-2 py-1' onClick={() => handleClick(entry.id)}>
+            <span className="text-2xl font-bold">{entry.category}</span>
+            <p className="text-blue-500">{formatDate(entry.date)}</p>
+            {/* Only show these details if this entry is selected */}
+            {selectedId === entry.id && (
+                <>
+                  <p className="text-blue-500">Kommentar: {entry.comment}</p>
+                  <p className="text-blue-500">Mätarställning: {entry.distanceInKilometers} km</p>
+                  <p className="text-blue-500">Kostnad: {entry.cost}:-</p>
+                  
+                  <div className='pt-3'>
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}>
+                      <img src={trash} className='w-8 h-8' />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); console.log("EDIT"); }}>
+                      <img src={edit} className='w-6 h-6 my-1 mx-1' />
+                    </button>
+                  </div>
+                </>
+              )}
           </li>
         ))}
       </ul>
@@ -34,10 +55,9 @@ const DataPresentation: React.FC<DataPresentationProps> = ({ entries, onDelete }
   );
 };
 
-function formatDate(date: string){
-  let result = date.substring(0,10) 
+function formatDate(date: string) {
+  let result = date.substring(0, 10); // Extract the date in YYYY-MM-DD format
   return result;
 }
 
 export default DataPresentation;
-  

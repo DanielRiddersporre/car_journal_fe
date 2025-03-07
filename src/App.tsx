@@ -18,14 +18,24 @@ interface JournalEntry {
 
 function App() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [totalFuelCosts, setTotalFuelCosts] = useState<number>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Function to fetch all entries from the DataService when the component mounts
   useEffect(() => {
+    const fetchTotalFuelCosts = async () => {
+      try {
+        const totalFuelCosts = await DataService.getTotalFuelCosts();
+        setTotalFuelCosts(totalFuelCosts);
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    } 
     const fetchEntries = async () => {
       try {
-        const fetchedEntries = await DataService.getAllEntries(); // Ensure getData returns a promise
+        const fetchedEntries = await DataService.getAllEntries();
         setEntries(fetchedEntries);
       } catch (error: any) {
         setError(error.message);
@@ -34,15 +44,15 @@ function App() {
       }
     };
 
+    fetchTotalFuelCosts();
     fetchEntries();
-  }, []); // This will only run on the first render (empty dependency array)
+  }, []);
 
-  // Function to handle adding a new entry
   const addNewEntry = async (entry: JournalEntry) => {
     try {
-      await DataService.addEntry(entry); // Add the entry to the DataService
-      const updatedEntries = await DataService.getAllEntries(); // Get the updated entries
-      setEntries(updatedEntries); // Update the state to reflect the new entries
+      await DataService.addEntry(entry);
+      const updatedEntries = await DataService.getAllEntries();
+      setEntries(updatedEntries);
     } catch (error: any) {
       setError(error.message);
       console.log(error.message);
@@ -51,8 +61,7 @@ function App() {
 
   const handleDelete = async (id: string) => {
     try {
-      await DataService.deleteEntry(id); // Call the DataService to delete the entry
-      // Optimistically update the state by filtering out the deleted entry
+      await DataService.deleteEntry(id);
       setEntries((prevEntries) => prevEntries.filter(entry => entry.id !== id));
     } catch (error: any) {
       setError(error.message);
@@ -77,7 +86,7 @@ function App() {
               <TopBar />
             </div>
             <Routes>
-              <Route index element={<Overview />} />
+              <Route index element={<Overview totalFuelCosts={totalFuelCosts} />} />
               <Route path="dataEntry" element={<DataEntry addNewEntry={addNewEntry} />} />
               <Route path="dataPresentation" element={<DataPresentation entries={entries} onDelete={handleDelete}/>} />
             </Routes>
@@ -89,4 +98,3 @@ function App() {
 }
 
 export default App;
-

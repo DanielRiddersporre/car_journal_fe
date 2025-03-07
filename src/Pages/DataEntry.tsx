@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { empty } from 'uuidv4';
 
 interface JournalEntry {
     id: string;
@@ -14,8 +15,12 @@ interface DataEntryProps {
 }
 
 function DataEntry({ addNewEntry }: DataEntryProps) {
+
+    // Empty UUID to make backend happy...
+    const emptyUUID = '00000000-0000-0000-0000-000000000000'
+
     const [formData, setFormData] = useState({
-        id: '',
+        id: emptyUUID,
         category: 'Tankning',  // Default value for the select
         comment: '',
         date: '',
@@ -40,7 +45,7 @@ function DataEntry({ addNewEntry }: DataEntryProps) {
         addNewEntry(entry);
 
         // Optionally reset the form (but keep the default type selected)
-        setFormData({id: '', category: 'Tankning', comment: '', date: '', distanceInKilometers: '', cost: '' });
+        setFormData({id: emptyUUID, category: 'Tankning', comment: '', date: '', distanceInKilometers: '', cost: '' });
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

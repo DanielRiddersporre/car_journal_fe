@@ -11,7 +11,15 @@ interface JournalEntryData {
 class DataService {
     // Fetch all journal entries
     static async getAllEntries(): Promise<JournalEntryData[]> {
-        const response = await fetch('http://localhost:5099/api/journalentry/');
+        const response = await fetch('http://localhost:5099/api/journalentry/all');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    }
+
+    static async getTotalFuelCosts(): Promise<number> {
+        const response = await fetch('http://localhost:5099/api/journalentry/total-fuel-costs');
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
